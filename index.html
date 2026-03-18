@@ -423,7 +423,7 @@
     }
 
     .post-detail {
-      max-width: 860px;
+      max-width: 780px;
       background: var(--surface);
       padding: 40px;
       border-radius: 30px;
@@ -448,23 +448,41 @@
     }
 
     .full-content {
-  white-space: pre-wrap;
-  line-height: 2;
-  font-size: 17px;
-  color: var(--text);
-  word-break: break-word;
-}
+      line-height: 1.85;
+      font-size: 17px;
+      color: var(--text);
+      word-break: break-word;
+      letter-spacing: 0.01em;
+    }
 
-.about-content {
-  line-height: 2;
-  font-size: 17px;
-  color: var(--text);
-  word-break: break-word;
-}
+    .full-content p {
+      margin-top: 0;
+      margin-bottom: 14px;
+    }
+
+    .full-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .full-content br {
+      line-height: 1.85;
+    }
+
+    .about-content {
+      line-height: 1.85;
+      font-size: 17px;
+      color: var(--text);
+      word-break: break-word;
+      letter-spacing: 0.01em;
+    }
 
     .about-content p {
       margin-top: 0;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
+    }
+
+    .about-content p:last-child {
+      margin-bottom: 0;
     }
 
     hr {
@@ -547,6 +565,11 @@
       .post-detail h1 {
         font-size: 28px;
       }
+
+      .full-content,
+      .about-content {
+        font-size: 16px;
+      }
     }
   </style>
 </head>
@@ -622,6 +645,21 @@
     function safeText(value, fallback = "") {
       if (value === null || value === undefined || value === "") return fallback;
       return escapeHtml(value);
+    }
+
+    function formatContentToHtml(value) {
+      if (value === null || value === undefined || value === "") {
+        return "<p>目前沒有內容。</p>";
+      }
+
+      const escaped = escapeHtml(String(value).trim());
+
+      const paragraphs = escaped
+        .split(/\n\s*\n/)
+        .map(paragraph => paragraph.replace(/\n/g, "<br>"))
+        .map(paragraph => `<p>${paragraph}</p>`);
+
+      return paragraphs.join("");
     }
 
     function formatDate(dateString) {
@@ -880,7 +918,7 @@
 
       const title = safeText(data.title, "未命名文章");
       const mood = safeText(data.mood_status, "日常");
-      const content = safeText(data.content, "");
+      const content = formatContentToHtml(data.content);
       const category = safeText(data.category, "未分類");
       const dateText = formatDate(data.created_at);
       const imageAlt = data.title ? `${data.title} 封面圖片` : "文章封面圖片";
