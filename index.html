@@ -12,17 +12,21 @@
     :root {
       --bg: #fff9f0;
       --surface: #ffffff;
-      --surface-soft: #efebe9;
+      --surface-soft: #f4ece6;
+      --surface-2: #fff4ea;
       --text: #5d4037;
       --text-soft: #6d4c41;
       --text-muted: #9e9e9e;
       --accent: #d84315;
       --accent-soft: #ffccbc;
+      --accent-deep: #bf360c;
+      --line: #eadfd7;
       --footer: #5d4037;
       --shadow: 0 8px 24px rgba(141, 110, 99, 0.08);
-      --shadow-hover: 0 12px 30px rgba(141, 110, 99, 0.14);
+      --shadow-hover: 0 14px 34px rgba(141, 110, 99, 0.14);
+      --radius-xl: 30px;
       --radius-lg: 24px;
-      --radius-md: 16px;
+      --radius-md: 18px;
       --radius-sm: 12px;
       --max-width: 1200px;
     }
@@ -41,14 +45,12 @@
       background: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      line-height: 1.6;
+      line-height: 1.65;
     }
 
     a {
       color: inherit;
+      text-decoration: none;
     }
 
     img {
@@ -58,6 +60,13 @@
       user-select: none;
     }
 
+    .site-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
     header {
       width: 100%;
       background: rgba(255, 255, 255, 0.88);
@@ -65,32 +74,41 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      border-bottom: 1px solid var(--surface-soft);
-      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
     }
 
     .header-container {
       width: 90%;
       max-width: var(--max-width);
       margin: 0 auto;
+      padding: 14px 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 16px;
     }
 
+    .brand-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
     .logo {
       font-size: 22px;
-      font-weight: 700;
+      font-weight: 800;
       color: var(--accent);
       cursor: pointer;
       border: none;
       background: none;
       padding: 0;
+      text-align: left;
     }
 
-    .logo:hover {
-      opacity: 0.9;
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-soft);
+      letter-spacing: 0.04em;
     }
 
     nav.filter-group {
@@ -103,7 +121,7 @@
       background: white;
       border: 1.5px solid var(--accent-soft);
       color: var(--accent);
-      padding: 8px 16px;
+      padding: 9px 16px;
       border-radius: 999px;
       cursor: pointer;
       font-size: 14px;
@@ -115,43 +133,192 @@
       transform: translateY(-1px);
     }
 
+    .button-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .button-primary:hover {
+      background: var(--accent-deep);
+      border-color: var(--accent-deep);
+    }
+
     main {
       width: 90%;
       max-width: var(--max-width);
+      padding: 28px 0 20px;
       min-height: 80vh;
-      padding: 36px 0 12px;
     }
 
-    .page-title {
-      margin: 0 0 6px;
-      font-size: 28px;
-      line-height: 1.3;
+    section {
+      margin-bottom: 34px;
     }
 
-    .page-subtitle {
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      align-items: stretch;
+      background: linear-gradient(135deg, #fff8f1 0%, #fff0e6 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      padding: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .hero-kicker {
+      display: inline-block;
+      align-self: flex-start;
+      background: #fff;
+      color: var(--accent);
+      border: 1px solid var(--accent-soft);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      margin: 0 0 14px;
+      font-size: 42px;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    .hero p {
       margin: 0 0 22px;
+      color: var(--text-soft);
+      font-size: 17px;
+      max-width: 580px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .hero-visual {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid rgba(216, 67, 21, 0.08);
+      min-height: 320px;
+    }
+
+    .hero-image-box {
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 4 / 3;
+      background: var(--surface-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .hero-image-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.25;
+    }
+
+    .section-head p {
+      margin: 6px 0 0;
       color: var(--text-soft);
       font-size: 15px;
     }
 
-    #content.grid {
+    .intro-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 30px;
-      width: 100%;
-      margin-top: 12px;
+      gap: 18px;
     }
 
-    #content.single {
-      display: block;
-      width: 100%;
+    .intro-card {
+      background: var(--surface-2);
+      border: 1px solid #f0dfd3;
+      border-radius: var(--radius-md);
+      padding: 20px;
+    }
+
+    .intro-card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .intro-card p {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 14px;
+    }
+
+    .mood-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .mood-chip {
+      background: #fff;
+      border: 1px solid var(--accent-soft);
+      color: var(--accent);
+      padding: 10px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      transition: all 0.25s ease;
+    }
+
+    .mood-chip:hover {
+      background: var(--accent-soft);
+      transform: translateY(-1px);
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
     }
 
     .post-card {
       background: var(--surface);
-      border: 2px solid var(--surface-soft);
+      border: 1px solid var(--line);
       border-radius: var(--radius-lg);
-      padding: 20px;
+      padding: 18px;
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
@@ -171,7 +338,7 @@
       aspect-ratio: 16 / 9;
       background: var(--surface-soft);
       border-radius: var(--radius-md);
-      margin-bottom: 15px;
+      margin-bottom: 14px;
       overflow: hidden;
     }
 
@@ -222,26 +389,37 @@
       color: var(--text-soft);
     }
 
-    h2 {
-      font-size: 20px;
+    .post-card h3,
+    .post-card h2 {
       margin: 0 0 10px;
       line-height: 1.4;
       color: var(--text);
     }
 
-    p {
-      margin: 0 0 15px;
-      font-size: 15px;
-      color: var(--text-soft);
+    .post-card h3 {
+      font-size: 20px;
     }
 
     .post-excerpt {
+      margin: 0 0 14px;
+      color: var(--text-soft);
+      font-size: 15px;
       flex-grow: 1;
     }
 
-    small {
+    .card-meta {
       color: var(--text-muted);
       font-size: 12px;
+    }
+
+    .status-box {
+      text-align: center;
+      background: white;
+      border: 1px solid var(--line);
+      padding: 26px;
+      border-radius: 18px;
+      color: var(--text-soft);
+      box-shadow: var(--shadow);
     }
 
     .post-detail {
@@ -252,12 +430,14 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
       margin: 0 auto;
       animation: fadeIn 0.35s ease;
+      border: 1px solid var(--line);
     }
 
     .post-detail h1 {
       margin-top: 8px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       line-height: 1.35;
+      font-size: 34px;
     }
 
     .post-meta {
@@ -267,35 +447,24 @@
       margin-bottom: 18px;
     }
 
-    .full-content {
+    .full-content,
+    .about-content {
       white-space: pre-wrap;
       line-height: 2;
-      font-size: 18px;
+      font-size: 17px;
       color: var(--text);
       word-break: break-word;
     }
 
-    .status-box {
-      grid-column: 1 / -1;
-      text-align: center;
-      background: white;
-      border: 1px solid var(--surface-soft);
-      padding: 24px;
-      border-radius: 18px;
-      color: var(--text-soft);
-      box-shadow: var(--shadow);
-    }
-
-    .about-content {
-      line-height: 2;
-      font-size: 16px;
-      color: var(--text);
+    .about-content p {
+      margin-top: 0;
+      margin-bottom: 16px;
     }
 
     hr {
       margin: 30px 0;
       border: 0;
-      border-top: 1px solid var(--surface-soft);
+      border-top: 1px solid var(--line);
     }
 
     footer {
@@ -305,6 +474,12 @@
       padding: 40px 0;
       text-align: center;
       margin-top: 50px;
+    }
+
+    .footer-content {
+      width: 90%;
+      max-width: var(--max-width);
+      margin: 0 auto;
     }
 
     .footer-content p {
@@ -324,69 +499,88 @@
       }
     }
 
-    @media (max-width: 900px) {
-      #content.grid {
-        grid-template-columns: repeat(2, 1fr);
+    @media (max-width: 1000px) {
+      .hero,
+      .intro-grid,
+      .content-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
       }
     }
 
-    @media (max-width: 600px) {
-      #content.grid {
-        grid-template-columns: 1fr;
-      }
-
+    @media (max-width: 700px) {
       .header-container {
         flex-direction: column;
         align-items: flex-start;
+      }
+
+      .intro-grid,
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding: 22px;
+      }
+
+      .hero h1 {
+        font-size: 32px;
+      }
+
+      .section-head h2 {
+        font-size: 24px;
       }
 
       .post-detail {
         padding: 24px;
       }
 
-      .page-title {
-        font-size: 24px;
-      }
-
-      .full-content {
-        font-size: 16px;
+      .post-detail h1 {
+        font-size: 28px;
       }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="header-container">
-      <button class="logo" onclick="fetchPosts()" aria-label="回到肉丸七的避風港首頁">
-        肉丸七的避風港
-      </button>
+  <div class="site-wrap">
+    <header>
+      <div class="header-container">
+        <div class="brand-block">
+          <button class="logo" onclick="renderHomePage()" aria-label="回到首頁">肉丸七的避風港</button>
+          <div class="brand-subtitle">Bearball Studio · 肉丸宮的溫柔入口</div>
+        </div>
 
-      <nav class="filter-group" aria-label="主要導覽">
-        <button onclick="fetchPosts()">避風港首頁</button>
-        <button onclick="showAboutPage()">關於肉丸七</button>
-      </nav>
-    </div>
-  </header>
+        <nav class="filter-group" aria-label="主要導覽">
+          <button onclick="renderHomePage()">首頁</button>
+          <button onclick="fetchPosts()">所有文章</button>
+          <button onclick="showAboutPage()">關於肉丸七</button>
+        </nav>
+      </div>
+    </header>
 
-  <main>
-    <h1 class="page-title">肉丸七的避風港</h1>
-    <p class="page-subtitle">收藏角色、故事與溫柔觀察的小小角落。</p>
-    <section id="content" class="grid" aria-live="polite">
-      <div class="status-box">載入中，請稍候……</div>
-    </section>
-  </main>
+    <main>
+      <div id="content" aria-live="polite">
+        <div class="status-box">載入中，請稍候……</div>
+      </div>
+    </main>
 
-  <footer>
-    <div class="footer-content">
-      <p>© 2026 Bearball Studio 肉丸宮</p>
-      <p>讓呼吸變溫柔的力量</p>
-    </div>
-  </footer>
+    <footer>
+      <div class="footer-content">
+        <p>© 2026 Bearball Studio 肉丸宮</p>
+        <p>讓呼吸變溫柔的力量</p>
+      </div>
+    </footer>
+  </div>
 
   <script>
     const SUPABASE_URL = "https://xuxksgybxxhdpxzhldho.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1eGtzZ3lieHhoZHB4emhsZGhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NzY0NjcsImV4cCI6MjA4ODM1MjQ2N30.ggWf5cUXj3Q4-kvF25TgVBVqhnthgZhob8o_KnApN7s";
-    const ABOUT_IMAGE = "https://xuxksgybxxhdpxzhldho.supabase.co/storage/v1/object/public/bearball-images/20250811_House5.jpg";
+
+    const HERO_IMAGE = "https://via.placeholder.com/1600x1200?text=Bearball+Seven";
+    const ABOUT_IMAGE = "https://via.placeholder.com/1600x900?text=About+Bearball+Seven";
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const contentDiv = document.getElementById("content");
@@ -414,26 +608,9 @@
     function renderImage(url, altText = "") {
       const safeAlt = escapeHtml(altText || "圖片");
       if (!isSafeImageUrl(url)) {
-        return `
-          <div class="img-fallback" aria-label="目前沒有圖片">
-            目前沒有圖片
-          </div>
-        `;
+        return `<div class="img-fallback">目前沒有圖片</div>`;
       }
       return `<img src="${url}" alt="${safeAlt}" loading="lazy" referrerpolicy="no-referrer" />`;
-    }
-
-    function setGridMode() {
-      contentDiv.className = "grid";
-    }
-
-    function setSingleMode() {
-      contentDiv.className = "single";
-    }
-
-    function renderStatus(message) {
-      setGridMode();
-      contentDiv.innerHTML = `<div class="status-box">${escapeHtml(message)}</div>`;
     }
 
     function safeText(value, fallback = "") {
@@ -452,8 +629,132 @@
       }).format(date);
     }
 
+    function showStatus(message) {
+      contentDiv.innerHTML = `<div class="status-box">${escapeHtml(message)}</div>`;
+    }
+
+    function buildPostCard(post) {
+      const title = safeText(post.title, "未命名文章");
+      const subject = safeText(post.subject, "");
+      const mood = safeText(post.mood_status, "日常");
+      const imageAlt = post.title ? `${post.title} 封面圖片` : "文章封面圖片";
+      const createdAt = formatDate(post.created_at);
+
+      return `
+        <article class="post-card" onclick="showDetail('${String(post.id).replace(/'/g, "\\'")}')">
+          <div class="img-container">
+            ${renderImage(post.cover_image, imageAlt)}
+          </div>
+          <a href="#" class="tag" onclick="filterEvent(event, null, '${String(post.mood_status || "").replace(/'/g, "\\'")}')">#${mood}</a>
+          <h3>${title}</h3>
+          <p class="post-excerpt">${subject}</p>
+          <div class="card-meta">${createdAt ? `發布於 ${escapeHtml(createdAt)}` : "點擊展開全文 →"}</div>
+        </article>
+      `;
+    }
+
+    async function renderHomePage() {
+      showStatus("正在整理首頁……");
+
+      const { data, error } = await supabaseClient
+        .from("posts")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(6);
+
+      if (error) {
+        console.error("renderHomePage error:", error);
+        showStatus("目前無法載入首頁內容，請稍後再試。");
+        return;
+      }
+
+      const posts = data || [];
+      const latestPostsHtml = posts.length
+        ? posts.map(buildPostCard).join("")
+        : `<div class="status-box">目前避風港還在整理中，請稍後再來看看。</div>`;
+
+      contentDiv.innerHTML = `
+        <section class="hero">
+          <div class="hero-copy">
+            <div class="hero-kicker">歡迎來到肉丸七的世界</div>
+            <h1>這裡，是肉丸七用來慢慢呼吸的地方。</h1>
+            <p>
+              在肉丸宮裡，故事不一定宏大，情緒也不需要被急著命名。
+              這裡收藏角色、日常、圖像與那些看似輕巧，卻能悄悄停留在心裡的片刻。
+            </p>
+            <div class="hero-actions">
+              <button class="button-primary" onclick="fetchPosts()">開始閱讀</button>
+              <button onclick="showAboutPage()">認識肉丸七</button>
+            </div>
+          </div>
+          <div class="hero-visual">
+            <div class="hero-image-box">
+              ${renderImage(HERO_IMAGE, "肉丸七首頁主視覺")}
+            </div>
+          </div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-head">
+            <div>
+              <h2>肉丸宮，是什麼樣的地方？</h2>
+              <p>一個由角色、觀察、幽默與溫柔所組成的小宇宙。</p>
+            </div>
+          </div>
+
+          <div class="intro-grid">
+            <div class="intro-card">
+              <h3>角色宇宙</h3>
+              <p>從肉丸七開始，Boo、Bubble、Rabbit 與更多夥伴，逐漸構成一個有節奏、有情感的小世界。</p>
+            </div>
+            <div class="intro-card">
+              <h3>圖像與故事</h3>
+              <p>這裡記錄角色設定、圖像創作與日常片段，讓每一次更新都成為世界觀的一部分。</p>
+            </div>
+            <div class="intro-card">
+              <h3>溫柔的觀看方式</h3>
+              <p>不急著定義，不急著結論。肉丸七更像一個陪你坐下來、一起看世界的朋友。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-head">
+            <div>
+              <h2>今天，想從哪一種心情開始？</h2>
+              <p>用情緒進入故事，也許比用分類更貼近肉丸七的節奏。</p>
+            </div>
+          </div>
+
+          <div class="mood-chips">
+            <button class="mood-chip" onclick="fetchPosts(null, '平靜')">#平靜</button>
+            <button class="mood-chip" onclick="fetchPosts(null, '療癒')">#療癒</button>
+            <button class="mood-chip" onclick="fetchPosts(null, '日常')">#日常</button>
+            <button class="mood-chip" onclick="fetchPosts(null, '幽默')">#幽默</button>
+            <button class="mood-chip" onclick="fetchPosts(null, '柔軟')">#柔軟</button>
+          </div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-head">
+            <div>
+              <h2>最新文章</h2>
+              <p>避風港裡最近更新的片刻。</p>
+            </div>
+            <button onclick="fetchPosts()">查看全部</button>
+          </div>
+
+          <div class="content-grid">
+            ${latestPostsHtml}
+          </div>
+        </section>
+      `;
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
     async function fetchPosts(categoryName = null, moodName = null) {
-      renderStatus("正在整理避風港……");
+      showStatus("正在整理避風港……");
 
       let query = supabaseClient.from("posts").select("*");
 
@@ -463,48 +764,68 @@
       const { data, error } = await query.order("created_at", { ascending: false });
 
       if (error) {
-        renderStatus("目前無法讀取內容，請稍後再試。");
         console.error("fetchPosts error:", error);
+        showStatus("目前無法讀取內容，請稍後再試。");
         return;
       }
 
       if (!data || data.length === 0) {
-        renderStatus("目前避風港還在整理中，請稍後再來看看。");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        contentDiv.innerHTML = `
+          <section class="section-card">
+            <div class="section-head">
+              <div>
+                <h2>所有文章</h2>
+                <p>目前避風港還在整理中，請稍後再來看看。</p>
+              </div>
+              <button onclick="renderHomePage()">回首頁</button>
+            </div>
+            <div class="status-box">目前沒有符合條件的文章。</div>
+          </section>
+        `;
         return;
       }
 
-      setGridMode();
-      contentDiv.innerHTML = data.map(post => {
-        const title = safeText(post.title, "未命名文章");
-        const subject = safeText(post.subject, "");
-        const mood = safeText(post.mood_status, "日常");
-        const imageAlt = post.title ? `${post.title} 封面圖片` : "文章封面圖片";
+      const heading = moodName
+        ? `#${escapeHtml(moodName)}`
+        : categoryName
+        ? escapeHtml(categoryName)
+        : "所有文章";
 
-        return `
-          <article class="post-card" onclick="showDetail('${String(post.id).replace(/'/g, "\\'")}')">
-            <div class="img-container">
-              ${renderImage(post.cover_image, imageAlt)}
+      const subtitle = moodName
+        ? "從這種心情出發，看看肉丸七記錄了哪些片刻。"
+        : categoryName
+        ? "以下是這個分類中的內容。"
+        : "把避風港裡的內容一篇一篇看完。";
+
+      contentDiv.innerHTML = `
+        <section class="section-card">
+          <div class="section-head">
+            <div>
+              <h2>${heading}</h2>
+              <p>${subtitle}</p>
             </div>
-            <a href="#" class="tag" onclick="filterEvent(event, null, '${String(post.mood_status || "").replace(/'/g, "\\'")}')">#${mood}</a>
-            <h2>${title}</h2>
-            <p class="post-excerpt">${subject}</p>
-            <small>點擊展開全文 →</small>
-          </article>
-        `;
-      }).join("");
+            <button onclick="renderHomePage()">回首頁</button>
+          </div>
+
+          <div class="content-grid">
+            ${data.map(buildPostCard).join("")}
+          </div>
+        </section>
+      `;
 
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function showAboutPage() {
-      setSingleMode();
       contentDiv.innerHTML = `
         <article class="post-detail">
+          <button onclick="renderHomePage()" style="margin-bottom:20px;">← 返回首頁</button>
           <h1>關於肉丸七</h1>
-          <div class="img-container">
-            ${renderImage(ABOUT_IMAGE, "肉丸七主視覺")}
+
+          <div class="img-container" style="margin-bottom: 28px;">
+            ${renderImage(ABOUT_IMAGE, "關於肉丸七主視覺")}
           </div>
+
           <div class="about-content">
             <p>在一個看似平凡、卻充滿想像力的世界裡，誕生了一群圓潤可愛、帶著幽默哲思的角色——這裡，就是「肉丸宮」。</p>
             <p>肉丸宮，是「肉丸小熊們的所在之地」。它不僅是一個角色世界觀，更是一個承載創意、情感與觀察的內容宇宙。透過角色設計、幽默語錄與日常感知的交織，以簡潔卻富有層次的表現方式，傳遞一種輕盈而不流於空洞的觀看體驗。</p>
@@ -517,7 +838,6 @@
             <p>肉丸宮的創作核心，不在於宏大的敘事，而在於那些微小卻真實的感受。透過角色、圖像與文字的融合，它持續探索一件簡單卻重要的事——在複雜的世界裡，如何保留一點輕鬆與幽默。</p>
             <p>而答案，或許就藏在肉丸七的一句話之中。</p>
           </div>
-          <button onclick="fetchPosts()" style="margin-top:30px;">返回首頁</button>
         </article>
       `;
 
@@ -531,8 +851,7 @@
     }
 
     async function showDetail(postId) {
-      setSingleMode();
-      contentDiv.innerHTML = `<div class="status-box">正在打開這篇文章……</div>`;
+      showStatus("正在打開這篇文章……");
 
       const { data, error } = await supabaseClient
         .from("posts")
@@ -541,6 +860,7 @@
         .single();
 
       if (error || !data) {
+        console.error("showDetail error:", error);
         contentDiv.innerHTML = `
           <div class="status-box">
             目前無法讀取這篇文章，請稍後再試。
@@ -549,7 +869,6 @@
             </div>
           </div>
         `;
-        console.error("showDetail error:", error);
         return;
       }
 
@@ -562,7 +881,7 @@
 
       contentDiv.innerHTML = `
         <article class="post-detail">
-          <button onclick="backToList()" style="margin-bottom:20px;">← 返回列表</button>
+          <button onclick="fetchPosts()" style="margin-bottom:20px;">← 返回列表</button>
 
           <div class="img-container" style="border-radius: 20px; margin-bottom: 30px;">
             ${renderImage(data.cover_image, imageAlt)}
@@ -590,11 +909,7 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    function backToList() {
-      fetchPosts();
-    }
-
-    fetchPosts();
+    renderHomePage();
   </script>
 </body>
 </html>
