@@ -510,6 +510,23 @@
       color: #efebe9;
       font-size: 14px;
       margin: 5px 0;
+    
+    .footer-social {
+  margin-top: 12px;
+    }
+
+    .footer-social a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border-radius: 50%;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+
+    .footer-social a:hover {
+      transform: translateY(-2px) scale(1.05);
+      opacity: 0.85;
     }
 
     @keyframes fadeIn {
@@ -597,11 +614,21 @@
     </main>
 
     <footer>
-      <div class="footer-content">
-        <p>© 2026 Bearball Studio 肉丸宮</p>
-        <p>肉丸七的避風港</p>
-      </div>
-    </footer>
+  <div class="footer-content">
+    <p>© 2026 Bearball Studio 肉丸宮</p>
+    <p>肉丸七的避風港</p>
+
+    <div class="footer-social">
+      <a href="https://www.instagram.com/bearball.seven/" target="_blank" aria-label="Instagram">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+          <rect x="2" y="2" width="20" height="20" rx="6" stroke="white" stroke-width="1.5"/>
+          <circle cx="12" cy="12" r="5" stroke="white" stroke-width="1.5"/>
+          <circle cx="17" cy="7" r="1.2" fill="white"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</footer>
   </div>
 
   <script>
