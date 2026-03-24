@@ -596,14 +596,14 @@
     <header>
       <div class="header-container">
         <div class="brand-block">
-          <button class="logo" onclick="renderHomePage()" aria-label="回到首頁">肉丸七的避風港</button>
+          <button class="logo" onclick="goHome()" aria-label="回到首頁">肉丸七的避風港</button>
           <div class="brand-subtitle">Bearball Studio · 肉丸宮入口</div>
         </div>
 
         <nav class="filter-group" aria-label="主要導覽">
-          <button onclick="renderHomePage()">首頁</button>
-          <button onclick="fetchPosts()">所有文章</button>
-          <button onclick="showAboutPage()">關於肉丸七</button>
+          <button onclick="goHome()">首頁</button>
+          <button onclick="goToPosts()">所有文章</button>
+          <button onclick="goToAbout()">關於肉丸七</button>
         </nav>
       </div>
     </header>
@@ -620,7 +620,7 @@
         <p>肉丸七的避風港</p>
 
         <div class="footer-social">
-          <a href="https://www.instagram.com/bearball.seven/" target="_blank" aria-label="Instagram">
+          <a href="https://www.instagram.com/bearball.seven/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
               <rect x="2" y="2" width="20" height="20" rx="6" stroke="white" stroke-width="1.5"/>
               <circle cx="12" cy="12" r="5" stroke="white" stroke-width="1.5"/>
@@ -635,15 +635,12 @@
   <script>
     const SUPABASE_URL = "https://xuxksgybxxhdpxzhldho.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1eGtzZ3lieHhoZHB4emhsZGhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NzY0NjcsImV4cCI6MjA4ODM1MjQ2N30.ggWf5cUXj3Q4-kvF25TgVBVqhnthgZhob8o_KnApN7s";
-
+    
     const HERO_IMAGE = "https://xuxksgybxxhdpxzhldho.supabase.co/storage/v1/object/public/bearball-images/Grass2.jpeg";
     const ABOUT_IMAGE = "https://xuxksgybxxhdpxzhldho.supabase.co/storage/v1/object/public/bearball-images/Grass1.jpeg";
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const contentDiv = document.getElementById("content");
-
-    let currentCategory = null;
-    let currentMood = null;
 
     function escapeHtml(value) {
       if (value === null || value === undefined) return "";
@@ -695,10 +692,8 @@
 
     function normalizePublishDate(value) {
       if (!value) return null;
-
       const date = new Date(value);
       if (!Number.isNaN(date.getTime())) return date;
-
       return null;
     }
 
@@ -729,12 +724,51 @@
       }).format(date);
     }
 
-    function getDisplayDate(post) {
-      return post.publish_date || "";
-    }
-
     function showStatus(message) {
       contentDiv.innerHTML = `<div class="status-box">${escapeHtml(message)}</div>`;
+    }
+
+    function getHashPath() {
+      const hash = window.location.hash || "#/";
+      return hash.startsWith("#") ? hash.slice(1) : hash;
+    }
+
+    function parseRoute() {
+      const fullPath = getHashPath();
+      const [pathPart, queryString = ""] = fullPath.split("?");
+      const params = new URLSearchParams(queryString);
+
+      return {
+        path: pathPart || "/",
+        params
+      };
+    }
+
+    function navigate(path) {
+      window.location.hash = path;
+    }
+
+    function goHome() {
+      navigate("/");
+    }
+
+    function goToPosts(category = "", mood = "") {
+      const params = new URLSearchParams();
+
+      if (category) params.set("category", category);
+      if (mood) params.set("mood", mood);
+
+      const queryString = params.toString();
+      navigate(queryString ? `/posts?${queryString}` : "/posts");
+    }
+
+    function goToAbout() {
+      navigate("/about");
+    }
+
+    function goToPost(slug) {
+      if (!slug) return;
+      navigate(`/post/${encodeURIComponent(slug)}`);
     }
 
     function buildPostCard(post) {
@@ -742,16 +776,14 @@
       const subject = safeText(post.subject, "");
       const mood = safeText(post.mood_status, "日常");
       const imageAlt = post.title ? `${post.title} 封面圖片` : "文章封面圖片";
-      const displayDate = formatDate(getDisplayDate(post));
-      const safeId = String(post.id).replace(/'/g, "\\'");
-      const safeMood = String(post.mood_status || "").replace(/'/g, "\\'");
+      const displayDate = formatDate(post.publish_date);
 
       return `
-        <article class="post-card" onclick="showDetail('${safeId}')">
+        <article class="post-card" onclick="goToPost('${escapeJs(post.slug)}')">
           <div class="img-container">
             ${renderImage(post.cover_image, imageAlt)}
           </div>
-          <a href="#" class="tag" onclick="filterEvent(event, null, '${safeMood}')">#${mood}</a>
+          <a href="#" class="tag" onclick="filterMoodEvent(event, '${escapeJs(post.mood_status || "")}')">#${mood}</a>
           <h3>${title}</h3>
           <p class="post-excerpt">${subject}</p>
           <div class="card-meta">${displayDate ? `發布於 ${escapeHtml(displayDate)}` : "尚未設定發布日期"}</div>
@@ -759,114 +791,16 @@
       `;
     }
 
-    async function renderHomePage() {
-      currentCategory = null;
-      currentMood = null;
-
-      showStatus("正在整理首頁……");
-
-      const { data, error } = await supabaseClient
-        .from("posts")
-        .select("*");
-
-      if (error) {
-        console.error("renderHomePage error:", error);
-        showStatus("目前無法載入首頁內容，請稍後再試。");
-        return;
-      }
-
-      const sortedPosts = sortPostsByPublishDate(data || []);
-      const posts = sortedPosts.slice(0, 6);
-
-      const latestPostsHtml = posts.length
-        ? posts.map(buildPostCard).join("")
-        : `<div class="status-box">目前避風港還在整理中，請稍後再來看看。</div>`;
-
-      contentDiv.innerHTML = `
-        <section class="hero">
-          <div class="hero-copy">
-            <div class="hero-kicker">歡迎來到肉丸七的世界</div>
-            <h1>這裡，是肉丸七和他的人類用來慢慢呼吸的地方。</h1>
-            <p>
-              在肉丸宮裡，故事不一定宏大，情緒也不需要被急著命名。
-              這裡收藏角色、日常、圖像與那些看似輕巧，卻能悄悄停留在心裡的片刻。
-            </p>
-            <div class="hero-actions">
-              <button class="button-primary" onclick="fetchPosts()">開始閱讀</button>
-              <button onclick="showAboutPage()">認識肉丸七</button>
-            </div>
-          </div>
-          <div class="hero-visual">
-            <div class="hero-image-box">
-              ${renderImage(HERO_IMAGE, "肉丸七首頁主視覺")}
-            </div>
-          </div>
-        </section>
-
-        <section class="section-card">
-          <div class="section-head">
-            <div>
-              <h2>肉丸宮，是什麼樣的地方？</h2>
-              <p>一個由角色、觀察、幽默與溫柔所組成的小宇宙。</p>
-            </div>
-          </div>
-
-          <div class="intro-grid">
-            <div class="intro-card">
-              <h3>角色宇宙</h3>
-              <p>從肉丸七開始，Boo、Bubble、Rabbit 與更多夥伴，逐漸構成一個有節奏、有情感的小世界。</p>
-            </div>
-            <div class="intro-card">
-              <h3>圖像與故事</h3>
-              <p>這裡記錄角色設定、圖像創作與日常片段，讓每一次更新都成為世界觀的一部分。</p>
-            </div>
-            <div class="intro-card">
-              <h3>溫柔的觀看方式</h3>
-              <p>不急著定義，不急著結論。肉丸七更像一個陪你坐下來、一起看世界的朋友。</p>
-            </div>
-          </div>
-        </section>
-
-        <section class="section-card">
-          <div class="section-head">
-            <div>
-              <h2>今天，想從哪一種心情開始？</h2>
-              <p>用情緒進入故事，也許比用分類更貼近肉丸七的節奏。</p>
-            </div>
-          </div>
-
-          <div class="mood-chips">
-            <button class="mood-chip" onclick="fetchPosts(null, '平靜')">#平靜</button>
-            <button class="mood-chip" onclick="fetchPosts(null, '療癒')">#療癒</button>
-            <button class="mood-chip" onclick="fetchPosts(null, '日常')">#日常</button>
-            <button class="mood-chip" onclick="fetchPosts(null, '幽默')">#幽默</button>
-          </div>
-        </section>
-
-        <section class="section-card">
-          <div class="section-head">
-            <div>
-              <h2>最新文章</h2>
-              <p>避風港裡最近更新的片刻。</p>
-            </div>
-            <button onclick="fetchPosts()">查看全部</button>
-          </div>
-
-          <div class="content-grid">
-            ${latestPostsHtml}
-          </div>
-        </section>
-      `;
-
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    function escapeJs(value) {
+      return String(value ?? "")
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, "\\n")
+        .replace(/\r/g, "\\r");
     }
 
-    async function fetchPosts(categoryName = null, moodName = null) {
-      currentCategory = categoryName;
-      currentMood = moodName;
-
-      showStatus("正在整理避風港……");
-
+    async function loadAllPosts(categoryName = null, moodName = null) {
       let query = supabaseClient
         .from("posts")
         .select("*");
@@ -882,26 +816,154 @@
       const { data, error } = await query;
 
       if (error) {
-        console.error("fetchPosts error:", error);
-        showStatus("目前無法讀取內容，請稍後再試。");
-        return;
+        throw error;
       }
 
-      const sortedData = sortPostsByPublishDate(data || []);
+      return sortPostsByPublishDate(data || []);
+    }
 
-      const heading = moodName
-        ? `#${escapeHtml(moodName)}`
-        : categoryName
-        ? escapeHtml(categoryName)
-        : "所有文章";
+    async function loadPostBySlug(slug) {
+      const { data, error } = await supabaseClient
+        .from("posts")
+        .select("*")
+        .eq("slug", slug)
+        .single();
 
-      const subtitle = moodName
-        ? "從這種心情出發，看看肉丸七記錄了哪些片刻。"
-        : categoryName
-        ? "以下是這個分類中的內容。"
-        : "把避風港裡的內容一篇一篇看完。";
+      if (error) {
+        throw error;
+      }
 
-      if (!sortedData.length) {
+      return data;
+    }
+
+    async function renderHomePage() {
+      showStatus("正在整理首頁……");
+
+      try {
+        const allPosts = await loadAllPosts();
+        const latestPosts = allPosts.slice(0, 6);
+
+        const latestPostsHtml = latestPosts.length
+          ? latestPosts.map(buildPostCard).join("")
+          : `<div class="status-box">目前避風港還在整理中，請稍後再來看看。</div>`;
+
+        contentDiv.innerHTML = `
+          <section class="hero">
+            <div class="hero-copy">
+              <div class="hero-kicker">歡迎來到肉丸七的世界</div>
+              <h1>這裡，是肉丸七和他的人類用來慢慢呼吸的地方。</h1>
+              <p>
+                在肉丸宮裡，故事不一定宏大，情緒也不需要被急著命名。
+                這裡收藏角色、日常、圖像與那些看似輕巧，卻能悄悄停留在心裡的片刻。
+              </p>
+              <div class="hero-actions">
+                <button class="button-primary" onclick="goToPosts()">開始閱讀</button>
+                <button onclick="goToAbout()">認識肉丸七</button>
+              </div>
+            </div>
+            <div class="hero-visual">
+              <div class="hero-image-box">
+                ${renderImage(HERO_IMAGE, "肉丸七首頁主視覺")}
+              </div>
+            </div>
+          </section>
+
+          <section class="section-card">
+            <div class="section-head">
+              <div>
+                <h2>肉丸宮，是什麼樣的地方？</h2>
+                <p>一個由角色、觀察、幽默與溫柔所組成的小宇宙。</p>
+              </div>
+            </div>
+
+            <div class="intro-grid">
+              <div class="intro-card">
+                <h3>角色宇宙</h3>
+                <p>從肉丸七開始，Boo、Bubble、Rabbit 與更多夥伴，逐漸構成一個有節奏、有情感的小世界。</p>
+              </div>
+              <div class="intro-card">
+                <h3>圖像與故事</h3>
+                <p>這裡記錄角色設定、圖像創作與日常片段，讓每一次更新都成為世界觀的一部分。</p>
+              </div>
+              <div class="intro-card">
+                <h3>溫柔的觀看方式</h3>
+                <p>不急著定義，不急著結論。肉丸七更像一個陪你坐下來、一起看世界的朋友。</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="section-card">
+            <div class="section-head">
+              <div>
+                <h2>今天，想從哪一種心情開始？</h2>
+                <p>用情緒進入故事，也許比用分類更貼近肉丸七的節奏。</p>
+              </div>
+            </div>
+
+            <div class="mood-chips">
+              <button class="mood-chip" onclick="goToPosts('', '平靜')">#平靜</button>
+              <button class="mood-chip" onclick="goToPosts('', '療癒')">#療癒</button>
+              <button class="mood-chip" onclick="goToPosts('', '日常')">#日常</button>
+              <button class="mood-chip" onclick="goToPosts('', '幽默')">#幽默</button>
+            </div>
+          </section>
+
+          <section class="section-card">
+            <div class="section-head">
+              <div>
+                <h2>最新文章</h2>
+                <p>避風港裡最近更新的片刻。</p>
+              </div>
+              <button onclick="goToPosts()">查看全部</button>
+            </div>
+
+            <div class="content-grid">
+              ${latestPostsHtml}
+            </div>
+          </section>
+        `;
+      } catch (error) {
+        console.error("renderHomePage error:", error);
+        showStatus("目前無法載入首頁內容，請稍後再試。");
+      }
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function renderPostsPage(categoryName = null, moodName = null) {
+      showStatus("正在整理避風港……");
+
+      try {
+        const posts = await loadAllPosts(categoryName, moodName);
+
+        const heading = moodName
+          ? `#${escapeHtml(moodName)}`
+          : categoryName
+          ? escapeHtml(categoryName)
+          : "所有文章";
+
+        const subtitle = moodName
+          ? "從這種心情出發，看看肉丸七記錄了哪些片刻。"
+          : categoryName
+          ? "以下是這個分類中的內容。"
+          : "把避風港裡的內容一篇一篇看完。";
+
+        if (!posts.length) {
+          contentDiv.innerHTML = `
+            <section class="section-card">
+              <div class="section-head">
+                <div>
+                  <h2>${heading}</h2>
+                  <p>${subtitle}</p>
+                </div>
+                <button onclick="goHome()">回首頁</button>
+              </div>
+              <div class="status-box">目前沒有符合條件的文章。</div>
+            </section>
+          `;
+          return;
+        }
+
         contentDiv.innerHTML = `
           <section class="section-card">
             <div class="section-head">
@@ -909,37 +971,26 @@
                 <h2>${heading}</h2>
                 <p>${subtitle}</p>
               </div>
-              <button onclick="renderHomePage()">回首頁</button>
+              <button onclick="goHome()">回首頁</button>
             </div>
-            <div class="status-box">目前沒有符合條件的文章。</div>
+
+            <div class="content-grid">
+              ${posts.map(buildPostCard).join("")}
+            </div>
           </section>
         `;
-        return;
+      } catch (error) {
+        console.error("renderPostsPage error:", error);
+        showStatus("目前無法讀取內容，請稍後再試。");
       }
-
-      contentDiv.innerHTML = `
-        <section class="section-card">
-          <div class="section-head">
-            <div>
-              <h2>${heading}</h2>
-              <p>${subtitle}</p>
-            </div>
-            <button onclick="renderHomePage()">回首頁</button>
-          </div>
-
-          <div class="content-grid">
-            ${sortedData.map(buildPostCard).join("")}
-          </div>
-        </section>
-      `;
 
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    function showAboutPage() {
+    function renderAboutPage() {
       contentDiv.innerHTML = `
         <article class="post-detail">
-          <button onclick="renderHomePage()" style="margin-bottom:20px;">← 返回首頁</button>
+          <button onclick="goHome()" style="margin-bottom:20px;">← 返回首頁</button>
           <h1>關於肉丸七</h1>
 
           <div class="img-container" style="margin-bottom: 28px;">
@@ -976,74 +1027,132 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    function filterEvent(event, category, mood) {
-      event.preventDefault();
-      event.stopPropagation();
-      fetchPosts(category, mood);
-    }
-
-    async function showDetail(postId) {
+    async function renderPostDetailPage(slug) {
       showStatus("正在打開這篇文章……");
 
-      const { data, error } = await supabaseClient
-        .from("posts")
-        .select("*")
-        .eq("id", postId)
-        .single();
+      try {
+        const data = await loadPostBySlug(slug);
 
-      if (error || !data) {
-        console.error("showDetail error:", error);
+        const title = safeText(data.title, "未命名文章");
+        const mood = safeText(data.mood_status, "日常");
+        const content = formatContentToHtml(data.content);
+        const category = safeText(data.category, "未分類");
+        const dateText = formatDate(data.publish_date);
+        const imageAlt = data.title ? `${data.title} 封面圖片` : "文章封面圖片";
+
+        contentDiv.innerHTML = `
+          <article class="post-detail">
+            <button onclick="goToPosts()" style="margin-bottom:20px;">← 返回文章列表</button>
+
+            <div class="img-container" style="border-radius: 20px; margin-bottom: 30px;">
+              ${renderImage(data.cover_image, imageAlt)}
+            </div>
+
+            <a href="#" class="tag" onclick="filterMoodEvent(event, '${escapeJs(data.mood_status || "")}')">#${mood}</a>
+
+            <h1>${title}</h1>
+
+            ${dateText ? `<div class="post-meta">發布時間：${escapeHtml(dateText)}</div>` : `<div class="post-meta">尚未設定發布日期</div>`}
+
+            <div class="full-content">${content}</div>
+
+            <hr />
+
+            <p style="font-size: 14px; color: #9e9e9e;">
+              探索更多：
+              <a href="#" class="category-link" onclick="filterCategoryEvent(event, '${escapeJs(data.category || "")}')">
+                ${category}
+              </a>
+            </p>
+          </article>
+        `;
+      } catch (error) {
+        console.error("renderPostDetailPage error:", error);
         contentDiv.innerHTML = `
           <div class="status-box">
             目前無法讀取這篇文章，請稍後再試。
             <div style="margin-top:16px;">
-              <button onclick="fetchPosts(currentCategory, currentMood)">返回列表</button>
+              <button onclick="goToPosts()">返回列表</button>
             </div>
           </div>
         `;
-        return;
       }
-
-      const title = safeText(data.title, "未命名文章");
-      const mood = safeText(data.mood_status, "日常");
-      const content = formatContentToHtml(data.content);
-      const category = safeText(data.category, "未分類");
-      const dateText = formatDate(data.publish_date);
-      const imageAlt = data.title ? `${data.title} 封面圖片` : "文章封面圖片";
-      const safeMood = String(data.mood_status || "").replace(/'/g, "\\'");
-      const safeCategory = String(data.category || "").replace(/'/g, "\\'");
-
-      contentDiv.innerHTML = `
-        <article class="post-detail">
-          <button onclick="fetchPosts(currentCategory, currentMood)" style="margin-bottom:20px;">← 返回列表</button>
-
-          <div class="img-container" style="border-radius: 20px; margin-bottom: 30px;">
-            ${renderImage(data.cover_image, imageAlt)}
-          </div>
-
-          <a href="#" class="tag" onclick="filterEvent(event, null, '${safeMood}')">#${mood}</a>
-
-          <h1>${title}</h1>
-
-          ${dateText ? `<div class="post-meta">發布時間：${escapeHtml(dateText)}</div>` : `<div class="post-meta">尚未設定發布日期</div>`}
-
-          <div class="full-content">${content}</div>
-
-          <hr />
-
-          <p style="font-size: 14px; color: #9e9e9e;">
-            探索更多：
-            <a href="#" class="category-link" onclick="filterEvent(event, '${safeCategory}', null)">
-              ${category}
-            </a>
-          </p>
-        </article>
-      `;
 
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    renderHomePage();
+    function filterMoodEvent(event, mood) {
+      event.preventDefault();
+      event.stopPropagation();
+      goToPosts("", mood);
+    }
+
+    function filterCategoryEvent(event, category) {
+      event.preventDefault();
+      event.stopPropagation();
+      goToPosts(category, "");
+    }
+
+    async function renderRoute() {
+      const route = parseRoute();
+      const path = route.path;
+      const params = route.params;
+
+      if (path === "/" || path === "") {
+        await renderHomePage();
+        return;
+      }
+
+      if (path === "/about") {
+        renderAboutPage();
+        return;
+      }
+
+      if (path === "/posts") {
+        const category = params.get("category") || null;
+        const mood = params.get("mood") || null;
+        await renderPostsPage(category, mood);
+        return;
+      }
+
+      if (path.startsWith("/post/")) {
+        const slug = decodeURIComponent(path.replace("/post/", "").trim());
+
+        if (!slug) {
+          contentDiv.innerHTML = `
+            <div class="status-box">
+              找不到文章網址。
+              <div style="margin-top:16px;">
+                <button onclick="goToPosts()">返回文章列表</button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        await renderPostDetailPage(slug);
+        return;
+      }
+
+      contentDiv.innerHTML = `
+        <div class="status-box">
+          找不到這個頁面。
+          <div style="margin-top:16px;">
+            <button onclick="goHome()">回到首頁</button>
+          </div>
+        </div>
+      `;
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      if (!window.location.hash) {
+        window.location.hash = "/";
+      } else {
+        renderRoute();
+      }
+    });
+
+    window.addEventListener("hashchange", renderRoute);
   </script>
 </body>
 </html>
